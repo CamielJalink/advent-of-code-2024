@@ -1,0 +1,29 @@
+{
+  "name": "advent-of-code-2024",
+  "version": "1.0.0",
+  "description": "Repository for solving the 2022 Advent-of-Code programming puzzles",
+  "main": "index.js",
+  "scripts": {
+    "part1": "npm run lint && tsc && node ./dist/part1.js",
+    "part2": "npm run lint && tsc && node ./dist/part2.js",
+    "lint": "eslint . --ext .ts",
+    "generateDay": "node generateDay.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CamielJalink/Advent-of-Code-2022.git"
+  },
+  "author": "CJ",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^20.17.9",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8",
+    "prompt-sync": "^4.2.0",
+    "typescript": "^4.9.5"
+  }
+}

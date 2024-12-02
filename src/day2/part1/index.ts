@@ -50,7 +50,6 @@ function findSafeReports(rapports: string[]) {
 
         if (!isAscending && !isDescending) {
             isSafe = false;
-            console.log(`rapport ${rapport} is not safe`);
         } else {
             for (let i = 1; i < rapport.length; i++) {
                 if (rapport[i] === rapport[i - 1]) {

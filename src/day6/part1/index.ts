@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 
 export default function advent() {
-    const stringInput = readFileSync("input/day6-test.txt", "utf-8");
+    const stringInput = readFileSync("input/day6.txt", "utf-8");
     const input = stringInput.split(/\n/gm);
     console.log(countDistinctPositions(input));
 }
@@ -29,7 +29,7 @@ class Guard {
         } else {
             const nextPosValue = this.areaMap.get(nextPos);
 
-            if (nextPosValue === ".") {
+            if (nextPosValue === "." || nextPosValue === "^") {
                 this.visitedPos.add(nextPos);
                 this.position = nextPos;
                 this.walk();
@@ -88,6 +88,5 @@ function countDistinctPositions(input: string[]) {
 
     const guard = new Guard(direction, position, areaMap);
     guard.walk();
-    console.log(guard.visitedPos);
     return guard.visitedPos.size;
 }

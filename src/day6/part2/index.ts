@@ -1,67 +1,83 @@
 import { readFileSync } from "fs";
 
 export default function advent() {
-    const stringInput = readFileSync("input/day6-test.txt", "utf-8");
-    const input = stringInput.split(/\n/gm);
+    const stringInput = readFileSync("input/day6.txt", "utf-8");
+    const input = stringInput.split(/\r\n/gm);
     console.log(countValidObsticlePositions(input));
 }
 
 class Guard {
     direction;
+    startingDirection;
     position;
+    startingPosition;
     areaMap: Map<string, string>;
     visitedPos: Set<string>;
 
     constructor(direction: string, position: string, areaMap: Map<string, string>) {
         this.direction = direction;
+        this.startingDirection = direction;
         this.position = position;
+        this.startingPosition = position;
         this.areaMap = areaMap;
         this.visitedPos = new Set();
         this.visitedPos.add(position + " top");
     }
 
-    walk() {
-        const nextPos: string = this.determineNextPos();
-
-        // If the nextPos doesn't exist, we are done walking.
-        if (!this.areaMap.has(nextPos)) {
-            return;
-        } else {
-            const nextPosValue = this.areaMap.get(nextPos);
-
-            if (nextPosValue === "." || nextPosValue === "^") {
-                this.visitedPos.add(nextPos + " " + this.direction);
-                this.position = nextPos;
-                this.walk();
-            } else {
-                this.turnRight();
-                this.walk();
-            }
-        }
+    resetGuard() {
+        this.direction = this.startingDirection;
+        this.position = this.startingPosition;
+        this.visitedPos = new Set();
+        this.visitedPos.add(this.position + " top");
     }
 
-    checkWalk(): boolean {
-        const nextPos: string = this.determineNextPos();
-        const nextPosWithDirection: string = nextPos + " " + this.direction;
+    checkBlockadePositions() {
+        const correctBlockadePositions = new Set();
 
-        if (this.visitedPos.has(nextPosWithDirection)) {
+        this.areaMap.forEach((value: string, key: string) => {
+            if (value === "." || value === "^") {
+                this.areaMap.set(key, "#"); // Try placing a barrel at that position.
+                this.resetGuard();
+
+                if (this.walk() === true) {
+                    correctBlockadePositions.add(key);
+                }
+
+                this.areaMap.set(key, "."); // Change it back.
+            }
+        });
+
+        return correctBlockadePositions.size;
+    }
+
+    // If the nextPos doesn't exist, we are done walking.
+    outOfBounds(nextPos: string) {
+        if (!this.areaMap.has(nextPos)) {
             return true;
         }
+        return false;
+    }
 
-        // If the nextPos doesn't exist, we are done walking.
-        if (!this.areaMap.has(nextPos)) {
+    walk(): boolean {
+        const nextPos: string = this.determineNextPos();
+
+        if (this.outOfBounds(nextPos)) {
             return false;
         } else {
             const nextPosValue = this.areaMap.get(nextPos);
 
             if (nextPosValue === "." || nextPosValue === "^") {
+                if (this.visitedPos.has(nextPos + " " + this.direction)) {
+                    return true;
+                }
                 this.visitedPos.add(nextPos + " " + this.direction);
                 this.position = nextPos;
-                return this.checkWalk();
-            } else {
+                return this.walk();
+            } else if (nextPosValue === "#") {
                 this.turnRight();
-                this.visitedPos.add(nextPos + " " + this.direction);
-                return this.checkWalk();
+                return this.walk();
+            } else {
+                return false;
             }
         }
     }
@@ -99,42 +115,18 @@ class Guard {
 
 function countValidObsticlePositions(input: string[]) {
     const areaMap = new Map();
-    let direction = "";
+    const startDirection = "top";
     let startPosition = "";
 
     for (let y = 0; y < input.length; y++) {
         for (let x = 0; x < input[y].length; x++) {
             if (input[y][x] === "^") {
-                direction = "top";
                 startPosition = x + "," + y;
             }
             areaMap.set(x + "," + y, input[y][x]);
         }
     }
 
-    let guard = new Guard(direction, startPosition, areaMap);
-    guard.walk();
-
-    const relevantPositions: Set<string> = new Set(guard.visitedPos);
-    relevantPositions.delete(startPosition + " top");
-
-    const validObstaclePositions = new Set<string>();
-    relevantPositions.forEach((position: string) => {
-        guard = new Guard("top", startPosition, areaMap);
-
-        const positionCoordinates = position.split(" ")[0];
-        guard.areaMap.delete(positionCoordinates);
-        guard.areaMap.set(positionCoordinates, "#");
-
-        if (guard.checkWalk()) {
-            // loop detected
-            console.log(position);
-            validObstaclePositions.add(position.split(" ")[0]);
-        }
-
-        guard.areaMap.delete(positionCoordinates);
-        guard.areaMap.set(positionCoordinates, ".");
-    });
-
-    return validObstaclePositions.size;
+    const guard = new Guard(startDirection, startPosition, areaMap);
+    return guard.checkBlockadePositions();
 }
